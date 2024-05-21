@@ -13,5 +13,8 @@
     "chai"
   ],
   "author": "Sachin Duhan",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "prettier": "^3.2.5"
+  }
 }

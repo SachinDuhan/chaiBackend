@@ -1,5 +1,6 @@
 import {v2 as cloudinary} from "cloudinary"
 import fs from "fs"
+import { log } from "util";
 
 cloudinary.config({ 
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
@@ -15,12 +16,12 @@ const uploadOnCloudinary = async (localFilePath) => {
             resource_type: "auto"
         })
         // file had been uploaded successfully
-        // console.log("file is uploaded on cloudinary", response.url);
-        console.log(localFilePath);
+        console.log("file is uploaded on cloudinary", response.url);
+        // console.log(localFilePath);
         console.log(fs.existsSync(localFilePath)); // true
         fs.unlink(localFilePath, (err) => {
             if (err) throw err;
-            console.log(String(localFilePath) + "was deleted")
+            // console.log(String(localFilePath) + "was deleted")
         });
         console.log('eheh', fs.existsSync(localFilePath)); // false
         return response
@@ -34,5 +35,22 @@ const uploadOnCloudinary = async (localFilePath) => {
     }
 }
 
+const deleteFromCloudinary = async (publicId, assetType)=> {
+    try {
+        if (!publicId) console.log("public id is missing");
+        
+        const response = await cloudinary.uploader.destroy(publicId, {assetType, type: "upload", invalidate: true});
+        console.log(publicId);
+        
+        console.log(response);
 
-export {uploadOnCloudinary}
+        // await cloudinary.api.update(publicId, { invalidate: true });
+        
+        return response;
+    } catch (error) {
+        throw error
+    }
+}
+
+
+export {uploadOnCloudinary, deleteFromCloudinary}

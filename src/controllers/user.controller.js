@@ -21,7 +21,6 @@ const generateAccessAndRefreshTokens = async(userId) => {
     }
 }
 
-
 const registerUser = asyncHandler( async (req, res) => {
     // get user details form frontend
     // validation - not empty
@@ -50,9 +49,13 @@ const registerUser = asyncHandler( async (req, res) => {
         throw new ApiError(409, "User with email or username alread exists")
     }
 
-    const avatarLocalPath = req.files?.avatar[0]?.path;
+    // const avatarLocalPath = req.files?.avatar[0]?.path
     // const coverImageLocalPath = req.files?.coverImage[0]?.path;
 
+    let avatarLocalPath;
+    if (req.files && Array.isArray(req.files.avatar) && req.files.avatar.length > 0) {
+        avatarLocalPath = req.files.avatar[0].path;
+    }
     let coverImageLocalPath;
     if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
         coverImageLocalPath = req.files.coverImage[0].path;
@@ -64,6 +67,9 @@ const registerUser = asyncHandler( async (req, res) => {
 
     const avatar = await uploadOnCloudinary(avatarLocalPath);
     const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+
+    console.log(avatar);
+    console.log(coverImage);
 
     if (!avatar) {
         throw new ApiError(400, "Avatar file is required")
@@ -406,7 +412,7 @@ const getUserWatchHistory = asyncHandler( async(req, res) => {
     const user = await User.aggregate([
         {
             $match: {
-                _id: new mongoose.Types.ObjectId(req.user._id)
+                _id: new mongoose.Types.ObjectId.createFromHexString(req.user._id)
             }
         },
         {

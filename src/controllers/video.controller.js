@@ -274,7 +274,7 @@ const deleteVideo = asyncHandler(async (req, res) => { // delete the connected c
   //TODO: delete video
 
   try {
-      const result = await Video.deleteOne({_id: videoId});
+      const result = await Video.findByIdAndDelete(videoId);
     
       return res
       .status(204)
@@ -304,8 +304,6 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
   }
 });
 
-const operationsOnOpen = asyncHandler(async (req, res) => {});
-
 export {
   getAllVideos,
   publishAVideo,
@@ -313,5 +311,4 @@ export {
   updateVideo,
   deleteVideo,
   togglePublishStatus,
-  operationsOnOpen,
 };

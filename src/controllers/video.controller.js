@@ -152,7 +152,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, createdVideo, "Video uploaded successfully"));
 });
 
-const getVideoById = asyncHandler(async (req, res) => {
+const getVideoById = asyncHandler(async (req, res) => { 
   const { videoId } = req.params;
   //TODO: get video by id
   if (videoId?.trim() === "") {
@@ -172,9 +172,19 @@ const getVideoById = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Video not found");
   }
 
+  let vid, user;
+
+  try {
+      vid = await Video.updateOne({_id: videoId}, {$inc: {views: 1}});  // increase video views and add to user watch history
+      user = req.user ? await User.updateOne({_id: req.user}, {$push: {watchHistory: videoId}}) : null;
+  } catch (error) {
+    throw new ApiError(500, error.message, error)
+  }
+
+
   return res
     .status(200)
-    .json(new ApiResponse(200, video, "Video found successfully"));
+    .json(new ApiResponse(200, {video, vid, user}, "Video found successfully"));
 });
 
 const updateVideo = asyncHandler(async (req, res) => {
@@ -259,9 +269,14 @@ const updateVideo = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, result, "video updated successfully"));
 });
 
-const deleteVideo = asyncHandler(async (req, res) => {
+const deleteVideo = asyncHandler(async (req, res) => { // delete the connected comments and likes
   const { videoId } = req.params;
   //TODO: delete video
+  const result = await Video.deleteOne({_id: videoId});
+
+  return res
+  .status(204)
+  .json(new ApiResponse(204, result, "Video deleted successfully"))
 });
 
 const togglePublishStatus = asyncHandler(async (req, res) => {

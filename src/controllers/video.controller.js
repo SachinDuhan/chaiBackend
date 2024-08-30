@@ -163,7 +163,7 @@ const getVideoById = asyncHandler(async (req, res) => {
 
   try {
     video = await Video.findById(videoId);
-    console.log(video);
+    // console.log(video);
   } catch (error) {
     throw new ApiError(404, "Video not found", error);
   }
@@ -272,15 +272,36 @@ const updateVideo = asyncHandler(async (req, res) => {
 const deleteVideo = asyncHandler(async (req, res) => { // delete the connected comments and likes
   const { videoId } = req.params;
   //TODO: delete video
-  const result = await Video.deleteOne({_id: videoId});
 
-  return res
-  .status(204)
-  .json(new ApiResponse(204, result, "Video deleted successfully"))
+  try {
+      const result = await Video.deleteOne({_id: videoId});
+    
+      return res
+      .status(204)
+      .json(new ApiResponse(204, result, "Video deleted successfully"))
+  } catch (error) {
+    throw new ApiError(500, error.message, error)
+  }
 });
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
+
+  try {
+    const video = await Video.findByIdAndUpdate(videoId, [
+        { $set: { isPublished: { $not: "$isPublished" } } }
+      ], { new: true });
+
+    if (!video) {
+        throw new ApiError(404, "Video not found")
+    }
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, video, "Video publish status toggled successfully"))
+  } catch (error) {
+    throw new ApiError(400, error.message, error)
+  }
 });
 
 const operationsOnOpen = asyncHandler(async (req, res) => {});

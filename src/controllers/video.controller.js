@@ -176,7 +176,7 @@ const getVideoById = asyncHandler(async (req, res) => {
 
   try {
       vid = await Video.updateOne({_id: videoId}, {$inc: {views: 1}});  // increase video views and add to user watch history
-      user = req.user ? await User.updateOne({_id: req.user}, {$push: {watchHistory: videoId}}) : null;
+      user = req.body.user ? await User.updateOne({_id: req.body.user}, {$push: {watchHistory: videoId}}) : null;
   } catch (error) {
     throw new ApiError(500, error.message, error)
   }

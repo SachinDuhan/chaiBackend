@@ -30,9 +30,31 @@ const createTweet = asyncHandler(async (req, res) => {
 
 const getUserTweets = asyncHandler(async (req, res) => {
     // TODO: get user tweets
-    const user = req?.user;
+    const {userId} = req.params;
     try {
-        const userTweets = await Tweet.find({owner: user?._id});
+        // const userTweets = await Tweet.find({owner: user?._id});
+        const userTweets = await Tweet.aggregate([
+            {
+                $match: {owner : new mongoose.Types.ObjectId(userId)}
+            },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "owner",
+                    foreignField: "_id",
+                    as: "owner",
+                    pipeline: [
+                        {
+                            $project: {
+                                fullName: 1,
+                                username: 1,
+                                avatar: 1
+                            }
+                        }
+                    ]
+                }
+            }
+        ])
 
         if (!userTweets) {
             throw new ApiError(500, "There was a problem fetching the tweets")
@@ -52,9 +74,9 @@ const updateTweet = asyncHandler(async (req, res) => {
     //TODO: update tweet
     try {
         const {content} = req.body;
-        const user = req?.user;
+        const {tweetId} = req.params
 
-        const updateTweet = await Tweet.updateOne({owner: user?._id}, {content});
+        const updateTweet = await Tweet.updateOne({_id: tweetId}, {content});
 
         if (!updateTweet || updateTweet.modifiedCount == 0) {
             throw new ApiError(500, "There was a problem updating the tweet")
@@ -69,9 +91,9 @@ const updateTweet = asyncHandler(async (req, res) => {
 const deleteTweet = asyncHandler(async (req, res) => {
     //TODO: delete tweet
     try {
-        const tweetId = req.params;
+        const {tweetId} = req.params;
 
-        const deleteTweet = await Tweet.deleteOne({_id : tweetId});
+        const deleteTweet = await Tweet.deleteOne({_id : tweetId})
 
         if (deleteTweet.deletedCount === 0) {
             throw new ApiError(404, "Tweet not found or not deleted");

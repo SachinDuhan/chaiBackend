@@ -249,7 +249,7 @@ const updateVideo = asyncHandler(async (req, res) => {
     }
 
     result = await Video.updateOne({ _id: videoId }, { $set: updateFields });
-    result = await Video.findById(videoId);
+    // result = await Video.findById(videoId);
   } catch (error) {
     throw new ApiError(500, error.message, error);
   }

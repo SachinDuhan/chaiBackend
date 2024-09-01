@@ -11,15 +11,16 @@ const toggleSubscription = asyncHandler(async (req, res) => {
     // TODO: toggle subscription
     const user = req.user;
     try {
-        const exist = await Subscription.find({subsciber : user?._id, channel: channelId})
+        const exist = await Subscription.findOne({subsciber : user?._id, channel: channelId})
+        
 
         if (exist) {
             const deleteSubscription = await Subscription.deleteOne(exist._id)
 
             if (!deleteSubscription) {
                 throw new ApiError(500, "There was a problem while unsubscribing")
-            } else if (deleteLike.deletedCount === 0) {
-                throw new ApiError(404, "Like not found or not deleted");
+            } else if (deleteSubscription.deletedCount === 0) {
+                throw new ApiError(404, "Subscription not found or not deleted");
             }
 
             return res.status(200).json(new ApiResponse(200, deleteSubscription, "Unsubscribed successfully"))
@@ -45,7 +46,7 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
     const {channelId} = req.params;
 
     try {
-        const subscribers = await Subscription.find({channel: channelId})
+        const subscribers = await Subscription.findOne({channel: channelId})
 
         if (!subscribers) {
             throw new ApiError("There was a problem fetching the subscribers")
@@ -66,7 +67,7 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
     // const { subscriberId } = req.params
     const user = req?.user;
     try {
-        const subscribed = await Subscription.find({subsciber: user?._id})
+        const subscribed = await Subscription.findOne({subsciber: user?._id})
 
         if (!subscribed) {
             throw new ApiError(500, "There was a problem fetching the subscriptions")

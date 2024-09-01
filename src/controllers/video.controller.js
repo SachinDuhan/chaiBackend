@@ -304,6 +304,22 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
   }
 });
 
+const getUserVideos = asyncHandler(async (req, res) => {
+  try {
+    const {userId} = req.params;
+
+    const videos = await Video.find({owner: userId});
+
+    if (!videos) {
+      throw new ApiError(500, "There was a problem fetching user's videos")
+    }
+
+    return res.status(200).json(new ApiResponse(200, videos, "Videos fetched successfully"))
+  } catch (error) {
+    throw new ApiError(500, error.message, error)
+  }
+})
+
 export {
   getAllVideos,
   publishAVideo,
@@ -311,4 +327,5 @@ export {
   updateVideo,
   deleteVideo,
   togglePublishStatus,
+  getUserVideos
 };

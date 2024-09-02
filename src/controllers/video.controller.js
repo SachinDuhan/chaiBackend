@@ -152,7 +152,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, createdVideo, "Video uploaded successfully"));
 });
 
-const getVideoById = asyncHandler(async (req, res) => { 
+const getVideoById = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
   //TODO: get video by id
   if (videoId?.trim() === "") {
@@ -175,16 +175,22 @@ const getVideoById = asyncHandler(async (req, res) => {
   let vid, user;
 
   try {
-      vid = await Video.updateOne({_id: videoId}, {$inc: {views: 1}});  // increase video views and add to user watch history
-      user = req.body.user ? await User.updateOne({_id: req.body.user}, {$push: {watchHistory: videoId}}) : null;
+    vid = await Video.updateOne({ _id: videoId }, { $inc: { views: 1 } }); // increase video views and add to user watch history
+    user = req.body.user
+      ? await User.updateOne(
+          { _id: req.body.user },
+          { $push: { watchHistory: videoId } }
+        )
+      : null;
   } catch (error) {
-    throw new ApiError(500, error.message, error)
+    throw new ApiError(500, error.message, error);
   }
-
 
   return res
     .status(200)
-    .json(new ApiResponse(200, {video, vid, user}, "Video found successfully"));
+    .json(
+      new ApiResponse(200, { video, vid, user }, "Video found successfully")
+    );
 });
 
 const updateVideo = asyncHandler(async (req, res) => {
@@ -269,18 +275,19 @@ const updateVideo = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, result, "video updated successfully"));
 });
 
-const deleteVideo = asyncHandler(async (req, res) => { // delete the connected comments and likes
+const deleteVideo = asyncHandler(async (req, res) => {
+  // delete the connected comments and likes
   const { videoId } = req.params;
   //TODO: delete video
 
   try {
-      const result = await Video.findByIdAndDelete(videoId);
-    
-      return res
+    const result = await Video.findByIdAndDelete(videoId);
+
+    return res
       .status(204)
-      .json(new ApiResponse(204, result, "Video deleted successfully"))
+      .json(new ApiResponse(204, result, "Video deleted successfully"));
   } catch (error) {
-    throw new ApiError(500, error.message, error)
+    throw new ApiError(500, error.message, error);
   }
 });
 
@@ -288,37 +295,43 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
 
   try {
-    const video = await Video.findByIdAndUpdate(videoId, [
-        { $set: { isPublished: { $not: "$isPublished" } } }
-      ], { new: true });
+    const video = await Video.findByIdAndUpdate(
+      videoId,
+      [{ $set: { isPublished: { $not: "$isPublished" } } }],
+      { new: true }
+    );
 
     if (!video) {
-        throw new ApiError(404, "Video not found")
+      throw new ApiError(404, "Video not found");
     }
 
     return res
-    .status(200)
-    .json(new ApiResponse(200, video, "Video publish status toggled successfully"))
+      .status(200)
+      .json(
+        new ApiResponse(200, video, "Video publish status toggled successfully")
+      );
   } catch (error) {
-    throw new ApiError(400, error.message, error)
+    throw new ApiError(400, error.message, error);
   }
 });
 
 const getUserVideos = asyncHandler(async (req, res) => {
   try {
-    const {userId} = req.params;
+    const { userId } = req.params;
 
-    const videos = await Video.find({owner: userId});
+    const videos = await Video.find({ owner: userId });
 
     if (!videos) {
-      throw new ApiError(500, "There was a problem fetching user's videos")
+      throw new ApiError(500, "There was a problem fetching user's videos");
     }
 
-    return res.status(200).json(new ApiResponse(200, videos, "Videos fetched successfully"))
+    return res
+      .status(200)
+      .json(new ApiResponse(200, videos, "Videos fetched successfully"));
   } catch (error) {
-    throw new ApiError(500, error.message, error)
+    throw new ApiError(500, error.message, error);
   }
-})
+});
 
 export {
   getAllVideos,
@@ -327,5 +340,5 @@ export {
   updateVideo,
   deleteVideo,
   togglePublishStatus,
-  getUserVideos
+  getUserVideos,
 };
